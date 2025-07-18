@@ -1,0 +1,9 @@
+name: db_1
+run-name: Setting up the db_1 database
+on: [push]
+jobs:
+  test-output:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Output
+        run: echo "Here is a test"

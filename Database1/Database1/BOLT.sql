@@ -1,0 +1,4 @@
+﻿CREATE TABLE [dbo].[BOLT]
+(
+	[Id] INT NOT NULL PRIMARY KEY
+)
