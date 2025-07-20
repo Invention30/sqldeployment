@@ -28,9 +28,9 @@ jobs:
 
       - name: Verify DACPAC creation
         run: |
-          if (Test-Path "./Database1/Database1/bin/Release/Database1.dacpac") {
+          if (Test-Path "./Database1/Database1/bin/Output/Database1.dacpac") {
             Write-Host "✅ DACPAC file created successfully"
-            Get-ChildItem "./Database1/Database1/bin/Release/" -Name
+            Get-ChildItem "./Database1/Database1/bin/Output/" -Name
           } else {
             Write-Host "❌ DACPAC file not found"
             exit 1
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: database-dacpac
-          path: './Database1/Database1/bin/Release/Database1.dacpac'
+          path: './Database1/Database1/bin/Output/Database1.dacpac'
           retention-days: 30
 
       - name: Deploy DACPAC to SQL Server
@@ -48,5 +48,5 @@ jobs:
         uses: azure/sql-action@v2.3
         with:
           connection-string: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
-          path: './Database1/Database1/bin/Release/Database1.dacpac'
+          path: './Database1/Database1/bin/Output/Database1.dacpac'
           action: 'Publish'
