@@ -48,10 +48,11 @@ jobs:
       - name: Azure Login (Workload Identity)
         uses: azure/login@v1
         with:
+          auth-type: IDENTITY
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+          enable-AzPSSession: true
       - name: Deploy DACPAC to SQL Server
         # if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
         uses: azure/sql-action@v2.3
