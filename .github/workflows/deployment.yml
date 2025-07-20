@@ -1,9 +1,52 @@
-name: db_1
-run-name: Setting up the db_1 database
+name: Build and Deploy SQL Project
 on: [push]
+# on: 
+#   push:
+#     branches: [ main, develop, feature/** ]
+#   pull_request:
+#     branches: [ main, develop ]
+
 jobs:
-  test-output:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: windows-latest
+    
     steps:
-      - name: Test Output
-        run: echo "Here is a test"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1
+
+      - name: Restore NuGet packages
+        run: nuget restore ./Database1/Database1.sln
+
+      - name: Build SQL Project
+        run: msbuild ./Database1/Database1/Database1.sqlproj /p:Configuration=Release /p:Platform="Any CPU" /verbosity:minimal
+
+      - name: Verify DACPAC creation
+        run: |
+          if (Test-Path "./Database1/Database1/bin/Release/Database1.dacpac") {
+            Write-Host "✅ DACPAC file created successfully"
+            Get-ChildItem "./Database1/Database1/bin/Release/" -Name
+          } else {
+            Write-Host "❌ DACPAC file not found"
+            exit 1
+          }
+
+      - name: Upload DACPAC as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-dacpac
+          path: './Database1/Database1/bin/Release/Database1.dacpac'
+          retention-days: 30
+
+      - name: Deploy DACPAC to SQL Server
+        # if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        uses: azure/sql-action@v2.3
+        with:
+          connection-string: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+          path: './Database1/Database1/bin/Release/Database1.dacpac'
+          action: 'Publish'
